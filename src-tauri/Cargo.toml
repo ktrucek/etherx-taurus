@@ -1,6 +1,6 @@
 [package]
 name = "etherx-browser"
-version = "2.4.133"
+version = "2.4.134"
 description = "EtherX Browser — Web3 Desktop Browser"
 authors = ["EtherX Team <info@kriptoentuzijasti.io>"]
 license = "SEE LICENSE IN LICENSE"
