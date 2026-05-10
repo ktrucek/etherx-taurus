@@ -1,0 +1,251 @@
+name: Release and Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      version-bump:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    outputs:
+      new-version: ${{ steps.bump-version.outputs.new-version }}
+      release-tag: ${{ steps.create-release.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Bump version
+        id: bump-version
+        run: |
+          CURRENT=$(jq -r '.version' package.json)
+          echo "Current version: $CURRENT"
+          
+          # Parse version
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          
+          case "${{ github.event.inputs.version-bump }}" in
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+          esac
+          
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "New version: $NEW_VERSION"
+          echo "new-version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          
+          # Update package.json
+          jq ".version = \"$NEW_VERSION\"" package.json > package.json.tmp
+          mv package.json.tmp package.json
+          
+          # Update Cargo.toml
+          sed -i "s/^version = .*/version = \"$NEW_VERSION\"/" src-tauri/Cargo.toml
+
+      - name: Commit version bump
+        run: |
+          git add package.json src-tauri/Cargo.toml
+          git commit -m "release: v${{ steps.bump-version.outputs.new-version }}"
+          git push origin main
+
+      - name: Create release tag
+        id: create-release
+        run: |
+          TAG="v${{ steps.bump-version.outputs.new-version }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.bump-version.outputs.new-version }}
+          release_name: Release v${{ steps.bump-version.outputs.new-version }}
+          body: |
+            ## Version ${{ steps.bump-version.outputs.new-version }}
+            
+            ### Build Artifacts
+            - 🍎 macOS Intel x64
+            - 🍎 macOS Apple Silicon arm64
+            - 🐧 Linux (AppImage + .deb)
+            - 🪟 Windows (Portable + ZIP)
+            
+            Built with Rust & Tauri v2
+          draft: false
+          prerelease: false
+
+  build-windows:
+    needs: release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri app
+        run: npm run build
+
+      - name: Upload to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.release.outputs.release-upload-url }}
+          asset_path: ./src-tauri/target/release/bundle/msi/
+          asset_name: etherx-browser-${{ needs.release.outputs.new-version }}-windows.msi
+          asset_content_type: application/octet-stream
+
+  build-macos:
+    needs: release
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            arch: aarch64
+          - target: x86_64-apple-darwin
+            arch: x86_64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri app
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+        run: npm run build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: macos-${{ matrix.target }}-${{ needs.release.outputs.new-version }}
+          path: src-tauri/target/release/bundle/
+          retention-days: 1
+
+  build-linux:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new-version }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libssl-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libxdo-dev \
+            build-essential \
+            curl \
+            wget \
+            file \
+            libsoup2.4-dev
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+
+      - name: Setup Rust cache
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./src-tauri"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Tauri app
+        run: npm run build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: linux-build-${{ needs.release.outputs.new-version }}
+          path: src-tauri/target/release/bundle/
+          retention-days: 1

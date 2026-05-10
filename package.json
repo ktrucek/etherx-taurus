@@ -1,0 +1,24 @@
+{
+  "name": "etherx-browser",
+  "version": "2.4.132",
+  "description": "EtherX Browser — Web3 Desktop Browser (Tauri v2)",
+  "private": true,
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:debug": "tauri build --debug",
+    "deploy:tauri": "bash ./deploy-tauri.sh",
+    "update:github": "bash ./update-github.sh",
+    "update:github:now": "bash ./update-github.sh \"update: quick sync\"",
+    "bump:patch": "bash bump-version.sh patch",
+    "bump:minor": "bash bump-version.sh minor",
+    "bump:major": "bash bump-version.sh major"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2"
+  }
+}

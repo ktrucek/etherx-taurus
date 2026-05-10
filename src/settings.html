@@ -1,0 +1,2402 @@
+<!DOCTYPE html>
+<!--
+  EtherX Browser — Settings Page
+  Copyright © 2024–2026 kriptoentuzijasti.io. All Rights Reserved.
+  PROPRIETARY AND CONFIDENTIAL — See LICENSE file.
+-->
+<html lang="hr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EtherX — Postavke</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #1a1a1a;
+      --bg2: #252525;
+      --bg3: #2d2d2d;
+      --bg4: #3a3a3a;
+      --border: #3d3d3d;
+      --border2: #4a4a4a;
+      --text: #e8e8e8;
+      --muted: #888;
+      --dim: #555;
+      --accent: #667eea;
+      --accent2: #764ba2;
+      --grad: linear-gradient(135deg, #667eea, #764ba2);
+      --success: #27c93f;
+      --warn: #ffbd2e;
+      --danger: #ff5f56;
+      --r: 6px;
+      --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: rgba(26, 26, 26, 0.85);
+      /* Semi-transparent */
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      backdrop-filter: none;
+      /* No blur */
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    .settings-layout {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Sidebar Nav */
+    .settings-nav {
+      width: 220px;
+      flex-shrink: 0;
+      background: rgba(37, 37, 37, 0.85);
+      /* Semi-transparent */
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .settings-nav-header {
+      padding: 20px 16px 12px;
+      background: transparent;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-nav-header h2 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .settings-nav-header p {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: .15s;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .nav-item:hover {
+      background: var(--bg3);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: var(--bg3);
+      color: var(--accent);
+      border-left-color: var(--accent);
+    }
+
+    .nav-item-icon {
+      font-size: 16px;
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Content */
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 40px;
+    }
+
+    .settings-section {
+      display: none;
+    }
+
+    .settings-section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .section-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    .settings-group {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    .settings-group-title {
+      padding: 12px 16px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .settings-row:last-child {
+      border-bottom: none;
+    }
+
+    .settings-row-icon {
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .settings-row-text {
+      flex: 1;
+    }
+
+    .settings-row-label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .settings-row-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
+    .settings-row-control {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Toggle */
+    .toggle {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      background: var(--bg4);
+      transition: .2s;
+    }
+
+    .toggle-slider:before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      bottom: 3px;
+      border-radius: 50%;
+      background: #fff;
+      transition: .2s;
+    }
+
+    .toggle input:checked+.toggle-slider {
+      background: var(--accent);
+    }
+
+    .toggle input:checked+.toggle-slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Inputs */
+    input[type=text],
+    input[type=url],
+    input[type=number],
+    select,
+    textarea {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--r);
+      color: var(--text);
+      font-size: 13px;
+      font-family: var(--font);
+      padding: 7px 10px;
+      outline: none;
+      transition: .15s;
+    }
+
+    input[type=text]:focus,
+    input[type=url]:focus,
+    input[type=number]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(102, 126, 234, .15);
+    }
+
+    select {
+      cursor: pointer;
+      min-width: 160px;
+    }
+
+    input[type=text].wide,
+    input[type=url].wide {
+      width: 320px;
+    }
+
+    input[type=number] {
+      width: 80px;
+    }
+
+    /* Button */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: var(--r);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: .15s;
+    }
+
+    .btn-primary {
+      background: var(--grad);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      opacity: .9;
+    }
+
+    .btn-secondary {
+      background: var(--bg4);
+      border: 1px solid var(--border2);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg3);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      opacity: .85;
+    }
+
+    /* Language grid */
+    .language-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+      padding: 16px;
+    }
+
+    .lang-card {
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      text-align: center;
+      transition: .15s;
+      background: var(--bg3);
+    }
+
+    .lang-card:hover {
+      border-color: var(--accent);
+    }
+
+    .lang-card.active {
+      border-color: var(--accent);
+      background: rgba(102, 126, 234, .1);
+    }
+
+    .lang-card-flag {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
+    .lang-card-name {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .lang-card-code {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* About box */
+    .about-box {
+      text-align: center;
+      padding: 32px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+    }
+
+    .about-logo-big {
+      width: 80px;
+      height: 80px;
+      background: var(--grad);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 44px;
+      font-weight: 900;
+      color: #fff;
+      margin: 0 auto 16px;
+    }
+
+    .about-box h2 {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .about-box .ver {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+
+    .about-box .copy {
+      font-size: 12px;
+      color: var(--dim);
+      line-height: 1.7;
+    }
+
+    .about-box .prop {
+      margin-top: 16px;
+      padding: 10px 16px;
+      background: rgba(255, 189, 46, .08);
+      border: 1px solid rgba(255, 189, 46, .2);
+      border-radius: var(--r);
+      font-size: 12px;
+      color: var(--warn);
+      text-align: left;
+    }
+
+    /* UA presets */
+    .ua-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .ua-preset-btn {
+      padding: 4px 10px;
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      background: var(--bg3);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 11px;
+      transition: .15s;
+    }
+
+    .ua-preset-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Password disclaimer */
+    .disclaimer-box {
+      padding: 12px 16px;
+      margin: 0 16px 12px;
+      background: rgba(255, 189, 46, .07);
+      border: 1px solid rgba(255, 189, 46, .2);
+      border-radius: var(--r);
+      font-size: 12px;
+      color: var(--warn);
+      line-height: 1.6;
+    }
+
+    /* Zoom slider */
+    input[type=range] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 4px;
+      background: var(--bg4);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+      width: 180px;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+    }
+
+    /* Icon picker */
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+      gap: 10px;
+      padding: 16px;
+    }
+
+    .icon-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 8px;
+      border: 2px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      background: var(--bg3);
+      transition: .15s;
+    }
+
+    .icon-card:hover {
+      border-color: var(--accent);
+    }
+
+    .icon-card.active {
+      border-color: var(--accent);
+      background: rgba(102, 126, 234, .12);
+    }
+
+    .icon-card img,
+    .icon-card .icon-emoji {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+      font-size: 36px;
+      line-height: 40px;
+      text-align: center;
+    }
+
+    .icon-card-label {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .icon-preview-box {
+      width: 80px;
+      height: 80px;
+      border-radius: 16px;
+      background: var(--grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: 900;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .icon-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+    }
+
+    .icon-url-input {
+      width: 100%;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="settings-layout">
+
+    <!-- ── Sidebar Navigation ─────────────────────────────────────── -->
+    <nav class="settings-nav">
+      <div class="settings-nav-header">
+        <h2>⚙ Postavke</h2>
+        <p>EtherX Browser</p>
+      </div>
+      <div class="nav-item active" data-section="general">
+        <span class="nav-item-icon">🏠</span> Opće
+      </div>
+      <div class="nav-item" data-section="language">
+        <span class="nav-item-icon">🌐</span> Jezik
+      </div>
+      <div class="nav-item" data-section="appearance">
+        <span class="nav-item-icon">🎨</span> Izgled
+      </div>
+      <div class="nav-item" data-section="icons">
+        <span class="nav-item-icon">🖼</span> Ikone preglednika
+      </div>
+      <div class="nav-item" data-section="privacy">
+        <span class="nav-item-icon">🛡</span> Privatnost i sigurnost
+      </div>
+      <div class="nav-item" data-section="ai">
+        <span class="nav-item-icon">🤖</span> AI asistent
+      </div>
+      <div class="nav-item" data-section="useragent">
+        <span class="nav-item-icon">🌍</span> User Agent
+      </div>
+      <div class="nav-item" data-section="passwords">
+        <span class="nav-item-icon">🔑</span> Lozinke
+      </div>
+      <div class="nav-item" data-section="sync">
+        <span class="nav-item-icon">📱</span> Sinkronizacija (QR)
+      </div>
+      <div class="nav-item" data-section="history">
+        <span class="nav-item-icon">📜</span> Povijest
+      </div>
+      <div class="nav-item" data-section="downloads">
+        <span class="nav-item-icon">⬇️</span> Preuzimanja
+      </div>
+      <div class="nav-item" data-section="search">
+        <span class="nav-item-icon">🔍</span> Pretraživač
+      </div>
+      <div class="nav-item" data-section="websites">
+        <span class="nav-item-icon">🌍</span> Web stranice
+      </div>
+      <div class="nav-item" data-section="security">
+        <span class="nav-item-icon">🔐</span> Sigurnost
+      </div>
+      <div class="nav-item" data-section="developer">
+        <span class="nav-item-icon">📊</span> Developer
+      </div>
+      <div class="nav-item" data-section="updates">
+        <span class="nav-item-icon">🔄</span> Nadogradnje
+      </div>
+
+      <div class="nav-item" data-section="agent">
+        <span class="nav-item-icon">🤖</span> AI Agent
+      </div>
+      <div class="nav-item" data-section="default">
+        <span class="nav-item-icon">⭐</span> Zadani preglednik
+      </div>
+      <div class="nav-item" data-section="about">
+        <span class="nav-item-icon">ℹ</span> O pregledniku
+      </div>
+    </nav>
+
+    <!-- ── Content ───────────────────────────────────────────────── -->
+    <div class="settings-content" id="settingsContent">
+
+      <!-- General -->
+      <div class="settings-section active" id="section-general">
+        <div class="section-title">🏠 Opće postavke</div>
+        <div class="section-desc">Osnovno ponašanje preglednika.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Početna stranica</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🏠</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Početna stranica (Homepage)</div>
+              <div class="settings-row-desc">URL koji se otvara pritiskom na ikonu kuće.</div>
+            </div>
+            <div class="settings-row-control">
+              <input type="url" class="wide" id="settingHomepage" placeholder="https://kriptoentuzijasti.io">
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📂</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Mapa preuzimanja</div>
+              <div class="settings-row-desc">Gdje se spremiaju preuzete datoteke.</div>
+            </div>
+            <div class="settings-row-control">
+              <input type="text" class="wide" id="settingDownloads" placeholder="~/Downloads">
+              <button class="btn btn-secondary" id="btnBrowseDownloads">Odaberi</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Zumiranje</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔍</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Zadano zumiranje</div>
+              <div class="settings-row-desc">Zadana razina zumiranja za sve stranice.</div>
+            </div>
+            <div class="settings-row-control">
+              <input type="range" id="settingZoom" min="50" max="200" step="10" value="100">
+              <span id="settingZoomVal" style="min-width:40px;text-align:right;">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Kartice</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📄</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Automatsko grupiranje kartica (AI)</div>
+              <div class="settings-row-desc">AI automatski grupira kartice po temama.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingAutoGroup"><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">💾</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Automatski vraćaj kartice</div>
+              <div class="settings-row-desc">Otvori kartice iz prethodne sesije pri pokretanju.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingRestoreTabs" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:20px;display:flex;gap:10px;">
+          <button class="btn btn-primary" id="btnSaveGeneral">💾 Spremi postavke</button>
+          <span id="saveStatus" style="align-self:center;font-size:12px;color:#27c93f;display:none;">✓ Spremljeno</span>
+        </div>
+      </div>
+
+      <!-- Language -->
+      <div class="settings-section" id="section-language">
+        <div class="section-title">🌐 Jezik sučelja</div>
+        <div class="section-desc">Odaberite jezik na kojemu će biti prikazano sučelje preglednika.</div>
+        <div class="language-grid" id="languageGrid">
+          <!-- filled by JS -->
+        </div>
+      </div>
+
+      <!-- Appearance -->
+      <div class="settings-section" id="section-appearance">
+        <div class="section-title">🎨 Izgled</div>
+        <div class="section-desc">Prilagodite vizualni stil preglednika.</div>
+
+        <!-- Live Preview Box -->
+        <div
+          style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:20px;">
+          <div
+            style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">
+            👁 Live Preview
+          </div>
+          <div id="appearancePreview"
+            style="background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:16px;min-height:200px;position:relative;overflow:hidden;">
+            <!-- Simulated tab bar -->
+            <div id="previewTabBar"
+              style="display:flex;gap:4px;background:var(--bg2);padding:8px;border-radius:6px;margin-bottom:12px;">
+              <div
+                style="background:var(--bg3);padding:6px 12px;border-radius:4px;font-size:11px;display:flex;align-items:center;gap:6px;">
+                <span style="width:12px;height:12px;background:var(--grad);border-radius:50%;"></span>
+                <span>Primjer kartice</span>
+              </div>
+              <div style="background:var(--bg4);padding:6px 12px;border-radius:4px;font-size:11px;color:var(--muted);">+
+              </div>
+            </div>
+            <!-- Simulated address bar -->
+            <div
+              style="background:var(--bg3);padding:8px 12px;border-radius:6px;display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span style="font-size:14px;">🔒</span>
+              <input type="text" value="https://example.com" readonly
+                style="background:transparent;border:none;color:var(--text);font-size:12px;flex:1;outline:none;">
+            </div>
+            <!-- Content area -->
+            <div style="background:var(--bg2);padding:16px;border-radius:6px;font-size:12px;line-height:1.8;">
+              <div style="width:80%;height:8px;background:var(--border2);border-radius:4px;margin-bottom:8px;"></div>
+              <div style="width:60%;height:8px;background:var(--border2);border-radius:4px;margin-bottom:8px;"></div>
+              <div style="width:90%;height:8px;background:var(--border2);border-radius:4px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Tema</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🌙</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Tema preglednika</div>
+              <div class="settings-row-desc">Odaberite tamnu ili svjetlu temu. Preview se ažurira odmah.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="settingTheme">
+                <option value="dark">Tamna</option>
+                <option value="light">Svijetla</option>
+                <option value="system">Sistemska</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" id="btnSaveAppearance">💾 Spremi</button>
+        </div>
+      </div>
+
+      <!-- Privacy & Security -->
+      <div class="settings-section" id="section-privacy">
+        <div class="section-title">🛡 Privatnost i sigurnost</div>
+        <div class="section-desc">Zaštita privatnosti i sigurnosne postavke.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Ad Blocker</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🚫</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Blokator oglasa i praćenja</div>
+              <div class="settings-row-desc">Blokira reklame, trackere i maliciozne skripte.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingAdBlock" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">TLS / HTTPS</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔒</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Prisili TLS 1.3</div>
+              <div class="settings-row-desc">Zahtijeva minimalno TLS 1.3 za sve HTTPS veze.
+                <strong>Preporučeno.</strong>
+              </div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingTLS" checked disabled><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">⬆️</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">HTTP → HTTPS automatski</div>
+              <div class="settings-row-desc">Automatski preusmjerava HTTP na HTTPS adrese.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingHttpsUpgrade" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Privatno pregledavanje</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🕵</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Incognito: samo RAM</div>
+              <div class="settings-row-desc">Privatne kartice NIKADA ne upisuju podatke na disk. Pri zatvaranju kartice,
+                svi podaci nestaju iz RAM-a.</div>
+            </div>
+            <div class="settings-row-control">
+              <span style="color:#27c93f;font-size:12px;font-weight:700;">✓ Uvijek uključeno</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">AI Phishing detekcija</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🎣</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Upozorenje o phishingu</div>
+              <div class="settings-row-desc">AI analizira URL i sadržaj stranice te upozorava o mogućim prevarama.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingPhishing" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Kolačići</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🗑️</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Obriši sve kolačiće</div>
+              <div class="settings-row-desc">Trajno obriši sve pohranjene kolačiće sa svih stranica.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-danger" id="btnClearAllCookies">Obriši sve</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Cache i privremeni podaci</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📊</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Veličina cache-a</div>
+              <div class="settings-row-desc">Trenutna veličina spremljenih cache podataka.</div>
+            </div>
+            <div class="settings-row-control">
+              <span id="cacheSize" style="color:var(--muted);font-size:13px;">Izračunavanje...</span>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🗑️</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Očisti cache</div>
+              <div class="settings-row-desc">Obriši sve privremene podatke i cache stranica.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-danger" id="btnClearCache">Očisti cache</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Dozvole stranica</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔔</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Push notifikacije</div>
+              <div class="settings-row-desc">Dopusti stranicama da šalju notifikacije.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingNotifications">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📍</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Pristup lokaciji</div>
+              <div class="settings-row-desc">Stranice mogu zatražiti tvoju geografsku lokaciju.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="settingGeolocation">
+                <option value="ask" selected>Uvijek pitaj</option>
+                <option value="allow">Uvijek dozvoli</option>
+                <option value="block">Nikad ne dijeli</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🎤</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Mikrofon</div>
+              <div class="settings-row-desc">Dopusti pristup mikrofonu za video pozive i snimanje.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="settingMicrophone">
+                <option value="ask" selected>Uvijek pitaj</option>
+                <option value="allow">Uvijek dozvoli</option>
+                <option value="block">Blokiraj</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📹</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Kamera</div>
+              <div class="settings-row-desc">Dopusti pristup kameri za video pozive.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="settingCamera">
+                <option value="ask" selected>Uvijek pitaj</option>
+                <option value="allow">Uvijek dozvoli</option>
+                <option value="block">Blokiraj</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;gap:10px;">
+          <button class="btn btn-primary" id="btnSavePrivacy">💾 Spremi</button>
+          <button class="btn btn-danger" id="btnClearAllData">🗑 Obriši sve podatke</button>
+        </div>
+      </div>
+
+      <!-- AI -->
+      <div class="settings-section" id="section-ai">
+        <div class="section-title">🤖 AI asistent (WebLLM)</div>
+        <div class="section-desc">EtherX koristi WebLLM — AI model koji radi lokalno u vašem pregledniku, bez interneta.
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">WebLLM model</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🧠</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">AI u Omniboxu (Smart Search)</div>
+              <div class="settings-row-desc">Možete pisati pitanja direktno u traku adrese. AI odgovara lokalno.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingAISmart" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📖</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">AI Reading Mode</div>
+              <div class="settings-row-desc">Uklanja reklame i prikazuje samo čisti tekst, sa mogućnošću prijevoda.
+              </div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingAIReading" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📂</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Automatsko grupiranje kartica</div>
+              <div class="settings-row-desc">AI automatski grupira kartice po temama i kategorijama.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingAIGroupTabs" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🎣</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Phishing detekcija (AI)</div>
+              <div class="settings-row-desc">AI analizira URL i sadržaj stranica u realnom vremenu.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle"><input type="checkbox" id="settingAIPhish" checked><span
+                  class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">WebLLM status</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">⚡</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Lokalni AI model</div>
+              <div class="settings-row-desc" id="webllmStatus">Provjera statusa...</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-secondary" id="btnLoadWebLLM">Učitaj model</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" id="btnSaveAI">💾 Spremi AI postavke</button>
+        </div>
+      </div>
+
+      <!-- User Agent -->
+      <div class="settings-section" id="section-useragent">
+        <div class="section-title">🌍 User Agent</div>
+        <div class="section-desc">Kako se EtherX Browser predstavlja web poslužiteljima. Savjet: koristite standardni
+          Chrome UA za maksimalnu kompatibilnost.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Aktivni User Agent</div>
+          <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+            <textarea id="settingUA" rows="3" style="width:100%;resize:vertical;font-size:12px;font-family:monospace;"
+              placeholder="Mozilla/5.0 ..."></textarea>
+            <div class="ua-presets" id="uaPresets"><!-- filled by JS --></div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" id="btnSaveUA">💾 Primijeni User Agent</button>
+          <button class="btn btn-secondary" id="btnResetUA">↺ Vrati zadano</button>
+        </div>
+      </div>
+
+      <!-- Passwords -->
+      <div class="settings-section" id="section-passwords">
+        <div class="section-title">🔑 Upravitelj lozinki</div>
+        <div class="section-desc">Lokalni trezor lozinki zaštićen AES-256-GCM enkripcijom.</div>
+
+        <div class="disclaimer-box">
+          ⚠ <strong>Važno:</strong> kriptoentuzijasti.io <strong>NEMA</strong> pristup vašim lozinkama.
+          Svi podaci su šifrirani lokalnim ključem koji se izvodi isključivo iz vaše glavne lozinke
+          koristeći PBKDF2-SHA256 s 600,000 iteracija. Vaša glavna lozinka se nikada ne sprema na disk.
+          Podaci ostaju na vašem uređaju.<br><br>
+          Za maksimalnu sigurnost, koristite <strong>Bitwarden</strong> (open-source, self-hostable).
+          EtherX podržava Bitwarden JSON format za uvoz/izvoz.
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Bitwarden integracija</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔐</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Koristi Bitwarden (preporučeno)</div>
+              <div class="settings-row-desc">Otvori Bitwarden za upravljanje lozinkama.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-secondary" id="btnOpenBitwarden">Otvori Bitwarden</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">↗</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Izvoz u Bitwarden formatu</div>
+              <div class="settings-row-desc">Izvezi sve lozinke u kompatibilni Bitwarden JSON format.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-secondary" id="btnExportBitwarden">Izvoz JSON</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sync -->
+      <div class="settings-section" id="section-sync">
+        <div class="section-title">📱 QR Sinkronizacija</div>
+        <div class="section-desc">Sinkronizirajte oznake, kartice i postavke između uređaja skeniranjem QR koda. Nema
+          servera — sve je lokalno.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Generiraj QR kod za sinkronizaciju</div>
+          <div class="settings-row" style="flex-direction:column;align-items:center;gap:16px;padding:24px;">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+              <button class="btn btn-primary" id="btnQRFull">📦 Sve podatke</button>
+              <button class="btn btn-secondary" id="btnQRBookmarks">☆ Samo oznake</button>
+              <button class="btn btn-secondary" id="btnQRTabs">📄 Samo kartice</button>
+              <button class="btn btn-secondary" id="btnQRSettings">⚙ Samo postavke</button>
+            </div>
+            <div id="settingsQRContainer" style="text-align:center;min-height:60px;">
+              <p style="color:#666;font-size:13px;">Odaberite što želite sinkronizirati i klikni gumb iznad.</p>
+            </div>
+            <p style="font-size:12px;color:#666;text-align:center;">
+              Skenirajte QR kodom na drugom uređaju koji ima EtherX Browser.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Default Browser -->
+      <div class="settings-section" id="section-default">
+        <div class="section-title">⭐ Zadani preglednik</div>
+        <div class="section-desc">Postavite EtherX Browser kao zadani preglednik na vašem sustavu.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Status</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">⭐</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">EtherX kao zadani preglednik</div>
+              <div class="settings-row-desc" id="defaultBrowserStatus">Provjeravam...</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-primary" id="btnSetDefault">Postavi kao zadani</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Instalacija na mobitel (PWA)</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📱</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Lokalna PWA instalacija</div>
+              <div class="settings-row-desc">
+                Otvorite adresu <code
+                  style="background:#2d2d2d;padding:2px 6px;border-radius:4px;">etherx://newtab</code>
+                na mobitelu u Chrome ili Safari → "Dodaj na početni zaslon" za instalaciju bez App Storea.
+                <br><br>
+                Pokrenite lokalni server: <code
+                  style="background:#2d2d2d;padding:2px 6px;border-radius:4px;">npm run serve</code>
+                i otvorite <code
+                  style="background:#2d2d2d;padding:2px 6px;border-radius:4px;">http://&lt;vaša-IP&gt;:8080</code>
+              </div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-secondary" id="btnPWAInfo">ℹ Upute</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Icons -->
+      <div class="settings-section" id="section-icons">
+        <div class="section-title">🖼 Ikone preglednika</div>
+        <div class="section-desc">Odaberite ikonu EtherX Browsera ili uploadajte vlastitu. Ikona se primjenjuje na
+          naslovnu traku i taskbar.</div>
+
+        <!-- Live preview -->
+        <div class="settings-group">
+          <div class="settings-group-title">Pregled trenutne ikone</div>
+          <div style="padding:20px;display:flex;align-items:center;gap:24px;">
+            <div class="icon-preview-box" id="iconPreviewBox">X</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;" id="iconPreviewLabel">EtherX (zadano)</div>
+              <div style="font-size:12px;color:#888;margin-top:4px;" id="iconPreviewPath">assets/icons/icon.svg</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preset icons -->
+        <div class="settings-group">
+          <div class="settings-group-title">Ugrađene ikone</div>
+          <div class="icon-grid" id="presetIconGrid">
+            <div class="icon-card active" data-icon="builtin:default" data-label="EtherX zadano">
+              <div
+                style="width:40px;height:40px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff;">
+                X</div>
+              <div class="icon-card-label">EtherX</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:dark" data-label="EtherX tamno">
+              <div
+                style="width:40px;height:40px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#667eea;">
+                X</div>
+              <div class="icon-card-label">Tamno</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:neon" data-label="EtherX neon">
+              <div
+                style="width:40px;height:40px;background:#0a0a0a;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#00ff88;text-shadow:0 0 10px #00ff88;">
+                X</div>
+              <div class="icon-card-label">Neon</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:fire" data-label="Vatra">
+              <div class="icon-emoji">🔥</div>
+              <div class="icon-card-label">Vatra</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:rocket" data-label="Raketa">
+              <div class="icon-emoji">🚀</div>
+              <div class="icon-card-label">Raketa</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:lock" data-label="Katanac">
+              <div class="icon-emoji">🔒</div>
+              <div class="icon-card-label">Privatnost</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:shield" data-label="Štit">
+              <div class="icon-emoji">🛡</div>
+              <div class="icon-card-label">Zaštita</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:crypto" data-label="Kripto">
+              <div class="icon-emoji">₿</div>
+              <div class="icon-card-label">Kripto</div>
+            </div>
+            <div class="icon-card" data-icon="builtin:globe" data-label="Globus">
+              <div class="icon-emoji">🌐</div>
+              <div class="icon-card-label">Globus</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload custom icon -->
+        <div class="settings-group">
+          <div class="settings-group-title">Vlastita ikona — Upload s diska</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">💾</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Odaberi datoteku (PNG, JPG, ICO, SVG)</div>
+              <div class="settings-row-desc">Preporučena veličina: 512×512 px. Koristit će se kao ikona preglednika.
+              </div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-secondary" id="btnChooseIconFile">📁 Odaberi datoteku</button>
+            </div>
+          </div>
+          <div class="settings-row" id="chosenFileRow" style="display:none;">
+            <div class="settings-row-icon">✓</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label" id="chosenFileName">—</div>
+              <div class="settings-row-desc" id="chosenFilePath" style="word-break:break-all;"></div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-primary" id="btnApplyFileIcon">✓ Primijeni</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Link to custom icon URL -->
+        <div class="settings-group">
+          <div class="settings-group-title">Vlastita ikona — URL linka</div>
+          <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:10px;">
+            <div style="display:flex;align-items:center;gap:8px;width:100%;">
+              <input type="url" id="iconUrlInput" class="icon-url-input"
+                placeholder="https://example.com/my-icon.png (512×512 preporučeno)">
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn btn-secondary" id="btnPreviewUrlIcon">👁 Pregled</button>
+              <button class="btn btn-primary" id="btnApplyUrlIcon">✓ Primijeni URL ikonu</button>
+            </div>
+            <div id="urlIconPreviewArea" style="display:none;margin-top:6px;">
+              <img id="urlIconImg" src=""
+                style="width:64px;height:64px;border-radius:12px;border:1px solid #3d3d3d;object-fit:cover;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Reset + apply -->
+        <div style="margin-top:16px;display:flex;gap:10px;">
+          <button class="btn btn-primary" id="btnApplySelectedIcon">✓ Primijeni odabranu ikonu</button>
+          <button class="btn btn-danger" id="btnResetIcon">↺ Vrati zadanu ikonu</button>
+          <span id="iconSaveStatus" style="align-self:center;font-size:12px;color:#27c93f;display:none;">✓ Ikona
+            primijenjena!</span>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="settings-section" id="section-history">
+        <div class="section-title">📜 Povijest pregledavanja</div>
+        <div class="section-desc">Upravljanje poviješću posjećenih stranica.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Čuvanje povijesti</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📅</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Koliko dugo čuvati povijest</div>
+              <div class="settings-row-desc">Automatski obriši povijest stariju od zadanog broja dana.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="settingHistoryDays">
+                <option value="7">7 dana</option>
+                <option value="30">30 dana</option>
+                <option value="90" selected>90 dana</option>
+                <option value="180">6 mjeseci</option>
+                <option value="365">1 godina</option>
+                <option value="-1">Zauvijek</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Brisanje povijesti</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🗑️</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Obriši svu povijest</div>
+              <div class="settings-row-desc">Trajno obriši sve podatke o posjećenim stranicama.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-danger" id="btnClearAllHistory">Obriši sve</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📆</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Obriši povijest po razdoblju</div>
+              <div class="settings-row-desc">Obriši povijest samo za određeno vremensko razdoblje.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="selectHistoryPeriod">
+                <option value="1">Zadnji sat</option>
+                <option value="24">Zadnjih 24 sata</option>
+                <option value="168">Zadnjih 7 dana</option>
+                <option value="720">Zadnjih 30 dana</option>
+              </select>
+              <button class="btn btn-secondary" id="btnClearHistoryPeriod">Obriši</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Pregled povijesti</div>
+          <div style="padding:0 0 8px">
+            <input type="text" id="histSearchInput" placeholder="Pretraži povijest…"
+              style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-size:12px;outline:none;box-sizing:border-box">
+          </div>
+          <div id="historySettingsList"
+            style="max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);background:var(--bg)">
+            <div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">Učitavanje…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Permissions -->
+      <div class="settings-section" id="section-downloads">
+        <div class="section-title">⬇️ Preuzimanja</div>
+        <div class="section-desc">Postav ke za preuzete datoteke.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Preuzimanje datoteka</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">💾</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Uvijek pitaj gdje spremiti</div>
+              <div class="settings-row-desc">Prikaži dijalog za odabir lokacije pri svakom preuzimanju.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingAskDownloadLocation">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📂</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Automatski otvori preuzete datoteke</div>
+              <div class="settings-row-desc">Automatski otvori sigurne tipove datoteka nakon preuzimanja.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingAutoOpenDownloads">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Engine -->
+      <div class="settings-section" id="section-search">
+        <div class="section-title">🔍 Pretraživač</div>
+        <div class="section-desc">Zadani search engine i prijedlozi.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Search engine</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔍</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Zadani pretraživač</div>
+              <div class="settings-row-desc">Engine koji se koristi za pretragu iz adresne trake.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="settingSearchEngine">
+                <option value="google" selected>Google</option>
+                <option value="duckduckgo">DuckDuckGo</option>
+                <option value="brave">Brave Search</option>
+                <option value="ecosia">Ecosia</option>
+                <option value="bing">Bing</option>
+                <option value="startpage">Startpage</option>
+                <option value="yahoo">Yahoo</option>
+                <option value="baidu">Baidu</option>
+              </select>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">💡</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Prijedlozi pretraživanja</div>
+              <div class="settings-row-desc">Prikaži prijedloge dok tipkaš u adresnoj traci.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingSearchSuggestions" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div class="settings-section" id="section-security">
+        <div class="section-title">🔐 Sigurnost</div>
+        <div class="section-desc">Dodatne sigurnosne funkcije i sigurnosne kopije.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Zaštita</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">⚠️</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Blokiraj opasne stranice</div>
+              <div class="settings-row-desc">Upozorenje prije posjete malware/phishing stranicama.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingSafeBrowsing" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔒</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Automatsko HTTPS preusmjeravanje</div>
+              <div class="settings-row-desc">Pokušaj koristiti HTTPS uvijek kada je moguće.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingAutoHTTPS" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Sigurnosna kopija</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📤</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Export postavki</div>
+              <div class="settings-row-desc">Spremi sve postavke u JSON datoteku.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-primary" id="btnExportSettings">Export</button>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">📥</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Import postavki</div>
+              <div class="settings-row-desc">Učitaj postavke iz prethodno spremljene datoteke.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-secondary" id="btnImportSettings">Import</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Websites -->
+      <div class="settings-section" id="section-websites">
+        <div class="section-title">🌍 Web stranice</div>
+        <div class="section-desc">Postavke za prikaz i ponašanje web stranica.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">DNS over HTTPS</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔐</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Omogući DoH</div>
+              <div class="settings-row-desc">Kriptiraj DNS upite preko HTTPS-a.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingDoH">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🌍</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">DoH provider</div>
+              <div class="settings-row-desc">Odaberi pružatelja usluge DNS over HTTPS.</div>
+            </div>
+            <div class="settings-row-control">
+              <select id="settingDoHProvider">
+                <option value="cloudflare" selected>Cloudflare (1.1.1.1)</option>
+                <option value="google">Google (8.8.8.8)</option>
+                <option value="quad9">Quad9 (9.9.9.9)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Developer -->
+      <div class="settings-section" id="section-developer">
+        <div class="section-title">📊 Developer opcije</div>
+        <div class="section-desc">Napredne opcije za razvoj i debug.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">DevTools</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🛠️</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Omogući Developer Tools</div>
+              <div class="settings-row-desc">Dozvoli otvaranje DevTools-a sa F12.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingDevTools" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔍</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Inspect element</div>
+              <div class="settings-row-desc">Omogući "Inspect Element" u kontekstnom meniju.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingInspect" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Updates -->
+      <div class="settings-section" id="section-updates">
+        <div class="section-title">🔄 Nadogradnje</div>
+        <div class="section-desc">Automatsko ažuriranje browsera.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Update postavke</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔄</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Automatske nadogradnje</div>
+              <div class="settings-row-desc">Automatski preuzmi i instaliraj nove verzije.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingAutoUpdate" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">✅</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Provjeri dostupne nadogradnje</div>
+              <div class="settings-row-desc">Ručno provjeri postoji li nova verzija browsera.</div>
+            </div>
+            <div class="settings-row-control">
+              <button class="btn btn-primary" id="btnCheckUpdates">Provjeri sada</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Update result card -->
+        <div id="updateResultCard"
+          style="display:none;margin-top:12px;border:1px solid var(--border);border-radius:var(--r);overflow:hidden">
+          <div id="updateResultHeader"
+            style="padding:12px 14px;display:flex;align-items:center;gap:10px;background:var(--bg3);border-bottom:1px solid var(--border)">
+            <span id="updateResultIcon" style="font-size:22px"></span>
+            <div style="flex:1">
+              <div id="updateResultTitle" style="font-size:13px;font-weight:600;color:var(--text)"></div>
+              <div id="updateResultSub" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
+            </div>
+          </div>
+          <div id="updateResultBody" style="display:none;padding:12px 14px">
+            <div id="updateChangelog"
+              style="font-size:12px;color:var(--text);background:var(--bg);border-radius:var(--r);padding:10px;max-height:130px;overflow-y:auto;white-space:pre-wrap;margin-bottom:10px;line-height:1.5">
+            </div>
+            <button class="btn btn-primary" id="btnDownloadUpdate" style="width:100%">⬇️ Preuzmi ažuriranje</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Agent -->
+      <div class="settings-section" id="section-agent">
+        <div class="section-title">🤖 AI Agent</div>
+        <div class="section-desc">Konfiguracija AI agenta za napredne funkcije.</div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">API ključevi</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔑</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Google Gemini API Key</div>
+              <div class="settings-row-desc">API ključ za Gemini AI sažetak stranice i analizu.</div>
+            </div>
+            <div class="settings-row-control">
+              <input type="password" class="wide" id="settingGeminiKey" placeholder="AIza...">
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🤖</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">OpenAI API Key</div>
+              <div class="settings-row-desc">API ključ za ChatGPT integraciju (opcionalno).</div>
+            </div>
+            <div class="settings-row-control">
+              <input type="password" class="wide" id="settingOpenAIKey" placeholder="sk-...">
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-group">
+          <div class="settings-group-title">Agent funkcije</div>
+          <div class="settings-row">
+            <div class="settings-row-icon">✨</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">Automatski sažetak stranica</div>
+              <div class="settings-row-desc">AI automatski generira sažetak pri učitavanju stranice.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingAutoSummarize">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-row-icon">🔍</div>
+            <div class="settings-row-text">
+              <div class="settings-row-label">AI asistent u adresnoj traci</div>
+              <div class="settings-row-desc">Omogući AI prijedloge i odgovore iz adresne trake.</div>
+            </div>
+            <div class="settings-row-control">
+              <label class="toggle">
+                <input type="checkbox" id="settingAIAssistant">
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="settings-section" id="section-about">
+        <div class="section-title">ℹ O EtherX Browseru</div>
+        <div class="section-desc">Informacije o pregledniku i licenci.</div>
+
+        <div class="about-box">
+          <div class="about-logo-big">X</div>
+          <h2>EtherX Browser</h2>
+          <div class="ver" id="aboutVer">Verzija 1.0.0</div>
+          <div class="copy">
+            © 2024–2026 kriptoentuzijasti.io<br>
+            Sva prava pridržana.<br>
+            Privatnost · Sigurnost · Web3
+          </div>
+          <div class="prop">
+            🔒 <strong>Proprietarni softver</strong><br>
+            Ovaj softver i sav pridruženi source code, binarni kod, dizajn i intelektualno vlasništvo
+            isključivo su vlasništvo kriptoentuzijasti.io. Kopiranje, distribuiranje, modificiranje
+            ili reverse-engineering strogo su zabranjeni bez pisanog dopuštenja.
+            Pogledajte datoteku <strong>LICENSE</strong> za detalje.
+          </div>
+          <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <a href="https://kriptoentuzijasti.io" style="padding:8px 20px;background:var(--grad);
+            color:#fff;border-radius:16px;text-decoration:none;font-size:13px;font-weight:600;">
+              🌐 kriptoentuzijasti.io
+            </a>
+            <button class="btn btn-secondary" id="btnViewLicense">📄 Licenca</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /settings-content -->
+  </div><!-- /settings-layout -->
+
+  <script>
+    (async function () {
+      const settings = await etherx.settings.get();
+      const langs = await etherx.i18n.getAvailableLanguages();
+      const version = await etherx.app.getVersion();
+
+      document.getElementById('aboutVer').textContent = 'Verzija ' + version;
+
+      // ── Nav ──────────────────────────────────────────────────────────────────────
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+          document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+          item.classList.add('active');
+          document.getElementById('section-' + item.dataset.section).classList.add('active');
+          // Scroll content to top
+          document.getElementById('settingsContent').scrollTop = 0;
+          // Load history entries when switching to history section
+          if (item.dataset.section === 'history') loadSettingsHistory('');
+        });
+      });
+
+      // ── Fill settings values ─────────────────────────────────────────────────────
+      document.getElementById('settingHomepage').value = settings.homepage || '';
+      document.getElementById('settingDownloads').value = settings.downloads_path || '';
+      document.getElementById('settingZoom').value = settings.zoom || 100;
+      document.getElementById('settingZoomVal').textContent = (settings.zoom || 100) + '%';
+      document.getElementById('settingAdBlock').checked = settings.adblock_enabled !== 'false';
+      document.getElementById('settingTLS').checked = true;
+      document.getElementById('settingHttpsUpgrade').checked = settings.https_upgrade !== 'false';
+      document.getElementById('settingUA').value = settings.user_agent || '';
+      document.getElementById('settingTheme').value = settings.theme || 'dark';
+
+      // Zoom slider
+      document.getElementById('settingZoom').addEventListener('input', e => {
+        document.getElementById('settingZoomVal').textContent = e.target.value + '%';
+      });
+
+      // ── Language Grid ────────────────────────────────────────────────────────────
+      const FLAGS = {
+        hr: '🇭🇷', en: '🇬🇧', de: '🇩🇪', fr: '🇫🇷', es: '🇪🇸', it: '🇮🇹', pt: '🇵🇹',
+        ru: '🇷🇺', bs: '🇧🇦', sr: '🇷🇸', sl: '🇸🇮', tr: '🇹🇷', pl: '🇵🇱'
+      };
+      const grid = document.getElementById('languageGrid');
+      const curLang = settings.language || 'hr';
+      langs.forEach(({ code, name }) => {
+        const card = document.createElement('div');
+        card.className = 'lang-card' + (code === curLang ? ' active' : '');
+        card.innerHTML = `<div class="lang-card-flag">${FLAGS[code] || '🌐'}</div>
+      <div class="lang-card-name">${name}</div>
+      <div class="lang-card-code">${code.toUpperCase()}</div>`;
+        card.addEventListener('click', async () => {
+          document.querySelectorAll('.lang-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          await etherx.i18n.setLanguage(code);
+          window.location.reload();
+        });
+        grid.appendChild(card);
+      });
+
+      // ── User Agent presets ───────────────────────────────────────────────────────
+      const UA_PRESETS = {
+        'EtherX (default)': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 EtherX/1.0',
+        'Chrome Windows': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Chrome macOS': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Firefox': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0',
+        'Mobile': 'Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.6261.90 Mobile Safari/537.36',
+      };
+      const presetsDiv = document.getElementById('uaPresets');
+      Object.entries(UA_PRESETS).forEach(([label, ua]) => {
+        const btn = document.createElement('button');
+        btn.className = 'ua-preset-btn';
+        btn.textContent = label;
+        btn.onclick = () => { document.getElementById('settingUA').value = ua; };
+        presetsDiv.appendChild(btn);
+      });
+
+      // ── Save handlers ────────────────────────────────────────────────────────────
+      // ── Performance: Debounced save ─────────────────────────────────────────
+      let saveTimer = null;
+      async function saveSettings(updates) {
+        // Debounce: čeka 300ms prije spremanja da izbjegne višestruke zapise
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(async () => {
+          await etherx.settings.save(updates);
+          showSaved();
+        }, 300);
+      }
+
+      // Instant save (za button clicks bez debounce-a)
+      async function saveSettingsNow(updates) {
+        await etherx.settings.save(updates);
+        showSaved();
+      }
+
+      function showSaved() {
+        const el = document.getElementById('saveStatus');
+        if (el) { el.style.display = 'inline'; setTimeout(() => el.style.display = 'none', 2500); }
+      }
+
+      document.getElementById('btnSaveGeneral').addEventListener('click', () => saveSettingsNow({
+        homepage: document.getElementById('settingHomepage').value,
+        downloads_path: document.getElementById('settingDownloads').value,
+        zoom: document.getElementById('settingZoom').value,
+        auto_group_tabs: document.getElementById('settingAutoGroup').checked ? 'true' : 'false',
+        restore_tabs: document.getElementById('settingRestoreTabs').checked ? 'true' : 'false',
+      }));
+
+      document.getElementById('btnSavePrivacy').addEventListener('click', () => saveSettings({
+        adblock_enabled: document.getElementById('settingAdBlock').checked ? 'true' : 'false',
+        https_upgrade: document.getElementById('settingHttpsUpgrade').checked ? 'true' : 'false',
+        phishing_detection: document.getElementById('settingPhishing').checked ? 'true' : 'false',
+      }));
+
+      document.getElementById('btnSaveAI').addEventListener('click', () => saveSettings({
+        ai_enabled: 'true',
+        ai_smart_search: document.getElementById('settingAISmart').checked ? 'true' : 'false',
+        ai_reading_mode: document.getElementById('settingAIReading').checked ? 'true' : 'false',
+        ai_group_tabs: document.getElementById('settingAIGroupTabs').checked ? 'true' : 'false',
+        ai_phishing: document.getElementById('settingAIPhish').checked ? 'true' : 'false',
+      }));
+
+      document.getElementById('btnSaveAppearance').addEventListener('click', () => saveSettings({
+        theme: document.getElementById('settingTheme').value,
+      }));
+
+      // ── Live Preview for Appearance ────────────────────────────────────────
+      document.getElementById('settingTheme')?.addEventListener('change', (e) => {
+        const preview = document.getElementById('appearancePreview');
+        if (e.target.value === 'light') {
+          preview.style.setProperty('--bg', '#ffffff');
+          preview.style.setProperty('--bg2', '#f5f5f5');
+          preview.style.setProperty('--bg3', '#ececec');
+          preview.style.setProperty('--bg4', '#d4d4d4');
+          preview.style.setProperty('--border', '#d0d0d0');
+          preview.style.setProperty('--border2', '#c0c0c0');
+          preview.style.setProperty('--text', '#1a1a1a');
+          preview.style.setProperty('--muted', '#666');
+        } else {
+          preview.style.setProperty('--bg', '#1a1a1a');
+          preview.style.setProperty('--bg2', '#252525');
+          preview.style.setProperty('--bg3', '#2d2d2d');
+          preview.style.setProperty('--bg4', '#3a3a3a');
+          preview.style.setProperty('--border', '#3d3d3d');
+          preview.style.setProperty('--border2', '#4a4a4a');
+          preview.style.setProperty('--text', '#e8e8e8');
+          preview.style.setProperty('--muted', '#888');
+        }
+      });
+
+      document.getElementById('btnSaveUA').addEventListener('click', async () => {
+        const ua = document.getElementById('settingUA').value.trim();
+        if (!ua) return;
+        await etherx.ua.set(ua);
+        await saveSettings({ user_agent: ua });
+      });
+      document.getElementById('btnResetUA').addEventListener('click', () => {
+        document.getElementById('settingUA').value = UA_PRESETS['EtherX (default)'];
+      });
+
+      // Default browser
+      const defStatus = document.getElementById('defaultBrowserStatus');
+      const isDef = await etherx.defaultBrowser.check();
+      defStatus.textContent = isDef ? '✓ EtherX je zadani preglednik' : '✗ EtherX nije zadani preglednik';
+      defStatus.style.color = isDef ? '#27c93f' : '#ff5f56';
+      document.getElementById('btnSetDefault').addEventListener('click', async () => {
+        const r = await etherx.defaultBrowser.set();
+        alert(r.message || r.error || 'Gotovo');
+      });
+
+      // QR Sync
+      async function genQR(type) {
+        const c = document.getElementById('settingsQRContainer');
+        c.innerHTML = '<p style="color:#666">Generiranje...</p>';
+        const r = await etherx.qrsync.exportProfile();
+        if (r.ok) {
+          c.innerHTML = `<img src="${r.qrDataUrl}" style="max-width:260px;border-radius:8px;"><p style="font-size:11px;color:#666;margin-top:8px;">${r.isPartial ? 'Podaci preveliki za jedan QR.' : 'Skenirajte ovaj QR na drugom EtherX uređaju.'}</p>`;
+        } else {
+          c.innerHTML = `<p style="color:#ff5f56">Greška: ${r.error}</p>`;
+        }
+      }
+      document.getElementById('btnQRFull').onclick = () => genQR('full');
+      document.getElementById('btnQRBookmarks').onclick = () => genQR('bookmarks');
+      document.getElementById('btnQRTabs').onclick = () => genQR('tabs');
+      document.getElementById('btnQRSettings').onclick = () => genQR('settings');
+
+      // Clear all data
+      document.getElementById('btnClearAllData').addEventListener('click', async () => {
+        if (confirm('Ovo će obrisati SVU povijest, oznake i podatke. Nastavi?')) {
+          await etherx.history.clear();
+          alert('Podaci obrisani.');
+        }
+      });
+
+      // Bitwarden
+      document.getElementById('btnOpenBitwarden').addEventListener('click', () => {
+        etherx.app.openExternal('https://bitwarden.com');
+      });
+
+      // License
+      document.getElementById('btnViewLicense').addEventListener('click', () => {
+        alert('Pogledajte datoteku LICENSE u korijenskom direktoriju projekta.\n\n© 2024–2026 kriptoentuzijasti.io — Sva prava pridržana.');
+      });
+
+      // WebLLM status
+      document.getElementById('webllmStatus').textContent =
+        typeof window.ai !== 'undefined'
+          ? '✓ Aktivan (lokalni model učitan)'
+          : '⚪ Nije učitan. Kliknite "Učitaj model" za aktivaciju.';
+
+      document.getElementById('btnLoadWebLLM').addEventListener('click', () => {
+        alert('WebLLM model se učitava prvi put (~500MB). Bit će pohranje lokalno za offline upotrebu. Ova značajka zahtijeva WebGPU preku sučelja. U tijeku razvoja.');
+      });
+
+      // ── Icons section ────────────────────────────────────────────────────────────
+      const BUILTIN_LABEL = {
+        'default': 'EtherX zadano',
+        'dark': 'EtherX tamno',
+        'neon': 'EtherX neon',
+        'fire': '🔥 Vatra',
+        'rocket': '🚀 Raketa',
+        'lock': '🔒 Privatnost',
+        'shield': '🛡 Zaštita',
+        'crypto': '₿ Kripto',
+        'globe': '🌐 Globus',
+      };
+
+      let pendingIconMeta = { type: 'builtin', key: 'default', filePath: '' };
+
+      // Load saved icon setting
+      const savedIconPath = settings.app_icon_path || '';
+      if (savedIconPath) {
+        pendingIconMeta = { type: 'file', filePath: savedIconPath };
+        document.getElementById('iconPreviewLabel').textContent = 'Vlastita ikona';
+        document.getElementById('iconPreviewPath').textContent = savedIconPath;
+        document.getElementById('iconPreviewBox').innerHTML =
+          `<img src="file://${savedIconPath}" onerror="this.parentElement.textContent='X'">`;
+      }
+
+      // Preset grid click
+      document.querySelectorAll('#presetIconGrid .icon-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('#presetIconGrid .icon-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+          const key = card.dataset.icon.replace('builtin:', '');
+          pendingIconMeta = { type: 'builtin', key };
+          // Update preview
+          const preview = document.getElementById('iconPreviewBox');
+          const cloned = card.querySelector('[style],[class~=icon-emoji]').cloneNode(true);
+          preview.innerHTML = '';
+          preview.appendChild(cloned);
+          document.getElementById('iconPreviewLabel').textContent = card.dataset.label || 'Ugrađena ikona';
+          document.getElementById('iconPreviewPath').textContent = `builtin:${key}`;
+        });
+      });
+
+      // Upload from disk
+      document.getElementById('btnChooseIconFile').addEventListener('click', async () => {
+        const r = await etherx.app.chooseIcon();
+        if (!r.ok) return;
+        pendingIconMeta = { type: 'file', filePath: r.filePath };
+        const name = r.filePath.split(/[\\/]/).pop();
+        document.getElementById('chosenFileName').textContent = name;
+        document.getElementById('chosenFilePath').textContent = r.filePath;
+        document.getElementById('chosenFileRow').style.display = 'flex';
+        // Preview
+        const preview = document.getElementById('iconPreviewBox');
+        preview.innerHTML = `<img src="file://${r.filePath}" onerror="this.parentElement.textContent='?'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
+        document.getElementById('iconPreviewLabel').textContent = name;
+        document.getElementById('iconPreviewPath').textContent = r.filePath;
+      });
+
+      document.getElementById('btnApplyFileIcon').addEventListener('click', async () => {
+        if (!pendingIconMeta.filePath) return;
+        const r = await etherx.app.setIcon(pendingIconMeta.filePath);
+        if (r.ok) { showIconSaved(); } else { alert('Greška: ' + r.error); }
+      });
+
+      // URL icon
+      document.getElementById('btnPreviewUrlIcon').addEventListener('click', () => {
+        const url = document.getElementById('iconUrlInput').value.trim();
+        if (!url) return;
+        const area = document.getElementById('urlIconPreviewArea');
+        const img = document.getElementById('urlIconImg');
+        img.src = url;
+        area.style.display = 'block';
+        pendingIconMeta = { type: 'url', url };
+        // Update preview box
+        document.getElementById('iconPreviewBox').innerHTML = `<img src="${url}" onerror="this.parentElement.textContent='?'" style="width:100%;height:100%;object-fit:cover;border-radius:16px;">`;
+        document.getElementById('iconPreviewLabel').textContent = 'URL ikona';
+        document.getElementById('iconPreviewPath').textContent = url;
+      });
+
+      document.getElementById('btnApplyUrlIcon').addEventListener('click', async () => {
+        const url = document.getElementById('iconUrlInput').value.trim();
+        if (!url) return;
+        // For URL icons: save URL to settings, visual only (Electron setIcon needs local file)
+        await saveSettings({ app_icon_url: url, app_icon_path: '' });
+        showIconSaved();
+      });
+
+      // Apply selected (builtin or pending file)
+      document.getElementById('btnApplySelectedIcon').addEventListener('click', async () => {
+        if (pendingIconMeta.type === 'file' && pendingIconMeta.filePath) {
+          const r = await etherx.app.setIcon(pendingIconMeta.filePath);
+          if (r.ok) showIconSaved(); else alert('Greška: ' + r.error);
+        } else if (pendingIconMeta.type === 'builtin') {
+          await saveSettings({ app_icon_path: '', app_icon_builtin: pendingIconMeta.key });
+          showIconSaved();
+        } else if (pendingIconMeta.type === 'url') {
+          await saveSettings({ app_icon_url: pendingIconMeta.url, app_icon_path: '' });
+          showIconSaved();
+        }
+      });
+
+      // Reset to default
+      document.getElementById('btnResetIcon').addEventListener('click', async () => {
+        const r = await etherx.app.resetIcon();
+        if (r.ok) {
+          document.querySelectorAll('#presetIconGrid .icon-card').forEach(c => c.classList.remove('active'));
+          document.querySelector('#presetIconGrid .icon-card[data-icon="builtin:default"]').classList.add('active');
+          document.getElementById('iconPreviewBox').innerHTML = '<div style="width:40px;height:40px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:900;color:#fff">X</div>';
+          document.getElementById('iconPreviewLabel').textContent = 'EtherX (zadano)';
+          document.getElementById('iconPreviewPath').textContent = 'assets/icons/icon.svg';
+          pendingIconMeta = { type: 'builtin', key: 'default' };
+          showIconSaved();
+        }
+      });
+
+      function showIconSaved() {
+        const el = document.getElementById('iconSaveStatus');
+        el.style.display = 'inline';
+        setTimeout(() => el.style.display = 'none', 2500);
+      }
+
+      // ── History ──────────────────────────────────────────────────────────────
+      document.getElementById('settingHistoryDays')?.addEventListener('change', async (e) => {
+        await saveSettings({ history_retention_days: parseInt(e.target.value) });
+      });
+
+      document.getElementById('btnClearAllHistory')?.addEventListener('click', async () => {
+        if (confirm('Obrisati svu povijest pregledavanja? Ova radnja je nepovratna.')) {
+          await etherx.db?.clearHistory();
+          alert('Povijest obrisana.');
+        }
+      });
+
+      document.getElementById('btnClearHistoryPeriod')?.addEventListener('click', async () => {
+        const hours = parseInt(document.getElementById('selectHistoryPeriod').value);
+        const cutoff = Date.now() - (hours * 60 * 60 * 1000);
+        await etherx.db?.clearHistorySince(cutoff);
+        alert(`Povijest obrisana za zadnjih ${hours}h.`);
+      });
+
+      // ── Cookies ──────────────────────────────────────────────────────────────
+      document.getElementById('settingCookiePolicy')?.addEventListener('change', async (e) => {
+        await saveSettings({ cookie_policy: e.target.value });
+      });
+
+      document.getElementById('btnClearAllCookies')?.addEventListener('click', async () => {
+        if (confirm('Obrisati sve kolačiće? Bit ćeš odjavljen sa svih stranica.')) {
+          await etherx.cookies?.clearAll();
+          alert('Kolačići obrisani.');
+        }
+      });
+
+      // ── Permissions ──────────────────────────────────────────────────────────
+      document.getElementById('settingNotifications')?.addEventListener('change', async (e) => {
+        await saveSettings({ notifications_enabled: e.target.checked });
+      });
+
+      document.getElementById('settingNotificationSound')?.addEventListener('change', async (e) => {
+        await saveSettings({ notification_sound: e.target.checked });
+      });
+
+      document.getElementById('settingGeolocation')?.addEventListener('change', async (e) => {
+        await saveSettings({ geolocation_policy: e.target.value });
+      });
+
+      document.getElementById('settingMicrophone')?.addEventListener('change', async (e) => {
+        await saveSettings({ microphone_policy: e.target.value });
+      });
+
+      document.getElementById('settingCamera')?.addEventListener('change', async (e) => {
+        await saveSettings({ camera_policy: e.target.value });
+      });
+
+      // ── Downloads ────────────────────────────────────────────────────────────
+      document.getElementById('settingAskDownloadLocation')?.addEventListener('change', async (e) => {
+        await saveSettings({ ask_download_location: e.target.checked });
+      });
+
+      document.getElementById('settingAutoOpenDownloads')?.addEventListener('change', async (e) => {
+        await saveSettings({ auto_open_downloads: e.target.checked });
+      });
+
+      // ── Search Engine ────────────────────────────────────────────────────────
+      document.getElementById('settingSearchEngine')?.addEventListener('change', async (e) => {
+        await saveSettings({ search_engine: e.target.value });
+      });
+
+      document.getElementById('settingSearchSuggestions')?.addEventListener('change', async (e) => {
+        await saveSettings({ search_suggestions: e.target.checked });
+      });
+
+      // ── Cache ────────────────────────────────────────────────────────────────
+      (async () => {
+        const size = await etherx.cache?.getSize() || 0;
+        const mb = (size / 1024 / 1024).toFixed(2);
+        document.getElementById('cacheSize').textContent = `${mb} MB`;
+      })();
+
+      document.getElementById('btnClearCache')?.addEventListener('click', async () => {
+        if (confirm('Očistiti sav cache? Stranice će se morati ponovo učitati.')) {
+          await etherx.cache?.clear();
+          alert('Cache očišćen.');
+          const size = await etherx.cache?.getSize() || 0;
+          const mb = (size / 1024 / 1024).toFixed(2);
+          document.getElementById('cacheSize').textContent = `${mb} MB`;
+        }
+      });
+
+      // ── Security ─────────────────────────────────────────────────────────────
+      document.getElementById('settingSafeBrowsing')?.addEventListener('change', async (e) => {
+        await saveSettings({ safe_browsing: e.target.checked });
+      });
+
+      document.getElementById('settingAutoHTTPS')?.addEventListener('change', async (e) => {
+        await saveSettings({ auto_https: e.target.checked });
+      });
+
+      // ── DNS ──────────────────────────────────────────────────────────────────
+      document.getElementById('settingDoH')?.addEventListener('change', async (e) => {
+        await saveSettings({ dns_over_https: e.target.checked });
+      });
+
+      document.getElementById('settingDoHProvider')?.addEventListener('change', async (e) => {
+        await saveSettings({ doh_provider: e.target.value });
+      });
+
+      // ── Developer ────────────────────────────────────────────────────────────
+      document.getElementById('settingDevTools')?.addEventListener('change', async (e) => {
+        await saveSettings({ devtools_enabled: e.target.checked });
+      });
+
+      document.getElementById('settingInspect')?.addEventListener('change', async (e) => {
+        await saveSettings({ inspect_enabled: e.target.checked });
+      });
+
+      // ── Updates ──────────────────────────────────────────────────────────────
+      document.getElementById('settingAutoUpdate')?.addEventListener('change', async (e) => {
+        await saveSettings({ auto_update: e.target.checked });
+      });
+
+      async function loadSettingsHistory(filter) {
+        const list = document.getElementById('historySettingsList');
+        if (!list) return;
+        let entries = [];
+        try { entries = await etherx.history.getAll() || []; } catch (e) { entries = []; }
+        if (filter) {
+          const f = filter.toLowerCase();
+          entries = entries.filter(h =>
+            (h.url || '').toLowerCase().includes(f) ||
+            (h.title || '').toLowerCase().includes(f)
+          );
+        }
+        if (!entries.length) {
+          list.innerHTML = '<div style="text-align:center;padding:24px;color:var(--muted);font-size:12px">Nema rezultata u povijesti.</div>';
+          return;
+        }
+        const groups = {};
+        entries.forEach(h => {
+          const d = new Date(h.visited_at || h.ts || Date.now()).toLocaleDateString('hr-HR');
+          (groups[d] = groups[d] || []).push(h);
+        });
+        list.innerHTML = '';
+        const today = new Date().toLocaleDateString('hr-HR');
+        Object.entries(groups).forEach(([day, items]) => {
+          const dt = document.createElement('div');
+          dt.style.cssText = 'font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);padding:6px 12px 4px;background:var(--bg3);position:sticky;top:0;z-index:1;letter-spacing:.5px';
+          dt.textContent = day === today ? 'Danas' : day;
+          list.appendChild(dt);
+          items.forEach(h => {
+            const el = document.createElement('div');
+            el.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--border);transition:.1s';
+            el.onmouseenter = () => el.style.background = 'rgba(255,255,255,.04)';
+            el.onmouseleave = () => el.style.background = '';
+            const time = new Date(h.visited_at || h.ts || Date.now()).toLocaleTimeString('hr-HR', { hour: '2-digit', minute: '2-digit' });
+            const esc = s => (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const faviconUrl = `https://www.google.com/s2/favicons?sz=14&domain_url=${encodeURIComponent(h.url)}`;
+            el.innerHTML = `<img src="${faviconUrl}" width="14" height="14" style="flex-shrink:0;border-radius:2px" onerror="this.style.display='none'">` +
+              `<div style="flex:1;min-width:0">` +
+              `<div style="font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.title || h.url)}</div>` +
+              `<div style="font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(h.url)}</div>` +
+              `</div><span style="font-size:10px;color:var(--dim);flex-shrink:0">${time}</span>`;
+            list.appendChild(el);
+          });
+        });
+      }
+
+      document.getElementById('histSearchInput')?.addEventListener('input', (e) => {
+        loadSettingsHistory(e.target.value);
+      });
+
+      document.getElementById('btnCheckUpdates')?.addEventListener('click', async () => {
+        const btn = document.getElementById('btnCheckUpdates');
+        const card = document.getElementById('updateResultCard');
+        btn.disabled = true;
+        btn.textContent = '⏳ Provjera…';
+        try {
+          const platform = await etherx.app.getPlatform();
+          const result = await etherx.update.check();
+          card.style.display = 'block';
+          const icon = document.getElementById('updateResultIcon');
+          const title = document.getElementById('updateResultTitle');
+          const sub = document.getElementById('updateResultSub');
+          const body = document.getElementById('updateResultBody');
+          const changelog = document.getElementById('updateChangelog');
+          if (!result?.ok) {
+            icon.textContent = '⚠️';
+            title.textContent = 'Greška pri provjeri';
+            sub.textContent = result?.error || 'Nepoznata greška';
+            body.style.display = 'none';
+          } else if (result.isNew) {
+            icon.textContent = '🚀';
+            title.textContent = `Nova verzija dostupna: ${result.latest}`;
+            sub.textContent = `Trenutna: ${result.current}  ·  Objavljeno: ${result.publishedAt ? new Date(result.publishedAt).toLocaleDateString('hr-HR') : '—'}`;
+            changelog.textContent = result.body || 'Nema opisa promjena.';
+            body.style.display = 'block';
+            const dlBtn = document.getElementById('btnDownloadUpdate');
+            dlBtn.onclick = async () => {
+              const assets = result.assets || [];
+              let asset = null;
+              if (platform === 'win32') asset = assets.find(a => a.name.endsWith('.exe') || a.name.includes('Setup'));
+              else if (platform === 'darwin') asset = assets.find(a => a.name.endsWith('.dmg'));
+              else asset = assets.find(a => a.name.endsWith('.AppImage') || a.name.endsWith('.deb'));
+              const dlUrl = asset?.url || `https://github.com/ktrucek/etherx-standalone/releases/tag/v${result.latest}`;
+              await etherx.nav.openExternal(dlUrl);
+            };
+          } else {
+            icon.textContent = '✅';
+            title.textContent = 'Koristiš najnoviju verziju';
+            sub.textContent = `Verzija ${result.current} je ažurna.`;
+            body.style.display = 'none';
+          }
+        } catch (e) {
+          const card2 = document.getElementById('updateResultCard');
+          card2.style.display = 'block';
+          document.getElementById('updateResultIcon').textContent = '⚠️';
+          document.getElementById('updateResultTitle').textContent = 'Greška';
+          document.getElementById('updateResultSub').textContent = e.message;
+          document.getElementById('updateResultBody').style.display = 'none';
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Provjeri sada';
+        }
+      });
+
+      // ── Backup ───────────────────────────────────────────────────────────────
+      document.getElementById('btnExportSettings')?.addEventListener('click', async () => {
+        const allSettings = await etherx.settings.get();
+        const json = JSON.stringify(allSettings, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `etherx-settings-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById('btnImportSettings')?.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const text = await file.text();
+          try {
+            const imported = JSON.parse(text);
+            await etherx.settings.save(imported);
+            alert('Postavke uspješno učitane. Browser će se restartirati.');
+            window.location.reload();
+          } catch (err) {
+            alert('Greška pri učitavanju: ' + err.message);
+          }
+        };
+        input.click();
+      });
+
+      // ── AI Agent ─────────────────────────────────────────────────────────────
+      document.getElementById('settingGeminiKey')?.addEventListener('change', async (e) => {
+        await saveSettings({ gemini_api_key: e.target.value });
+      });
+
+      document.getElementById('settingOpenAIKey')?.addEventListener('change', async (e) => {
+        await saveSettings({ openai_api_key: e.target.value });
+      });
+
+      document.getElementById('settingAutoSummarize')?.addEventListener('change', async (e) => {
+        await saveSettings({ auto_summarize: e.target.checked });
+      });
+
+      document.getElementById('settingAIAssistant')?.addEventListener('change', async (e) => {
+        await saveSettings({ ai_assistant_enabled: e.target.checked });
+      });
+
+      // Load saved values for new settings
+      if (settings.history_retention_days !== undefined) {
+        document.getElementById('settingHistoryDays').value = settings.history_retention_days;
+      }
+      if (settings.cookie_policy && document.getElementById('settingCookiePolicy')) {
+        document.getElementById('settingCookiePolicy').value = settings.cookie_policy;
+      }
+      if (settings.notifications_enabled !== undefined) {
+        document.getElementById('settingNotifications').checked = settings.notifications_enabled;
+      }
+      if (settings.notification_sound !== undefined && document.getElementById('settingNotificationSound')) {
+        document.getElementById('settingNotificationSound').checked = settings.notification_sound;
+      }
+      if (settings.geolocation_policy) {
+        document.getElementById('settingGeolocation').value = settings.geolocation_policy;
+      }
+      if (settings.microphone_policy) {
+        document.getElementById('settingMicrophone').value = settings.microphone_policy;
+      }
+      if (settings.camera_policy) {
+        document.getElementById('settingCamera').value = settings.camera_policy;
+      }
+      if (settings.ask_download_location !== undefined) {
+        document.getElementById('settingAskDownloadLocation').checked = settings.ask_download_location;
+      }
+      if (settings.auto_open_downloads !== undefined) {
+        document.getElementById('settingAutoOpenDownloads').checked = settings.auto_open_downloads;
+      }
+      if (settings.search_engine) {
+        document.getElementById('settingSearchEngine').value = settings.search_engine;
+      }
+      if (settings.search_suggestions !== undefined) {
+        document.getElementById('settingSearchSuggestions').checked = settings.search_suggestions;
+      }
+      if (settings.safe_browsing !== undefined) {
+        document.getElementById('settingSafeBrowsing').checked = settings.safe_browsing;
+      }
+      if (settings.auto_https !== undefined) {
+        document.getElementById('settingAutoHTTPS').checked = settings.auto_https;
+      }
+      if (settings.dns_over_https !== undefined) {
+        document.getElementById('settingDoH').checked = settings.dns_over_https;
+      }
+      if (settings.doh_provider) {
+        document.getElementById('settingDoHProvider').value = settings.doh_provider;
+      }
+      if (settings.devtools_enabled !== undefined) {
+        document.getElementById('settingDevTools').checked = settings.devtools_enabled;
+      }
+      if (settings.inspect_enabled !== undefined) {
+        document.getElementById('settingInspect').checked = settings.inspect_enabled;
+      }
+      if (settings.auto_update !== undefined) {
+        document.getElementById('settingAutoUpdate').checked = settings.auto_update;
+      }
+      if (settings.gemini_api_key) {
+        document.getElementById('settingGeminiKey').value = settings.gemini_api_key;
+      }
+      if (settings.openai_api_key) {
+        document.getElementById('settingOpenAIKey').value = settings.openai_api_key;
+      }
+      if (settings.auto_summarize !== undefined) {
+        document.getElementById('settingAutoSummarize').checked = settings.auto_summarize;
+      }
+      if (settings.ai_assistant_enabled !== undefined) {
+        document.getElementById('settingAIAssistant').checked = settings.ai_assistant_enabled;
+      }
+
+    })();
+  </script>
+</body>
+
+</html>

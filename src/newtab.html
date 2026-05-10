@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!--
+  EtherX Browser — New Tab Page
+  Copyright © 2024–2026 kriptoentuzijasti.io. All Rights Reserved.
+-->
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Nova kartica — EtherX</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#1a1a1a;--bg2:#252525;--bg3:#2d2d2d;--border:#3d3d3d;
+      --text:#e8e8e8;--muted:#888;
+      --accent:#667eea;--grad:linear-gradient(135deg,#667eea,#764ba2);
+      --r:8px;--font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font);}
+    body{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+      padding:60px 20px 40px;overflow-y:auto;}
+
+    .logo{
+      width:64px;height:64px;background:var(--grad);border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:38px;font-weight:900;color:#fff;margin-bottom:20px;
+      box-shadow:0 8px 32px rgba(102,126,234,.4);
+    }
+    h1{font-size:26px;font-weight:700;margin-bottom:4px;}
+    .sub{font-size:14px;color:var(--muted);margin-bottom:40px;}
+
+    .search-box{
+      width:min(600px,100%);background:var(--bg2);border:1px solid var(--border);
+      border-radius:28px;display:flex;align-items:center;
+      padding:0 20px;gap:12px;margin-bottom:48px;
+      transition:.2s;
+    }
+    .search-box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(102,126,234,.18);}
+    .search-box input{
+      flex:1;background:none;border:none;outline:none;padding:14px 0;
+      font-size:16px;color:var(--text);font-family:var(--font);
+    }
+    .search-box button{
+      background:var(--grad);border:none;border-radius:20px;
+      padding:8px 18px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;
+    }
+
+    .quick-links{
+      display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));
+      gap:12px;width:min(700px,100%);margin-bottom:48px;
+    }
+    .ql-item{
+      background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+      padding:16px 10px;text-align:center;cursor:pointer;
+      text-decoration:none;color:var(--text);
+      transition:.15s;
+    }
+    .ql-item:hover{background:var(--bg3);border-color:var(--accent);}
+    .ql-icon{font-size:28px;margin-bottom:6px;}
+    .ql-name{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+    .section-title{
+      width:min(700px,100%);font-size:13px;font-weight:700;
+      color:var(--muted);text-transform:uppercase;letter-spacing:.5px;
+      margin-bottom:12px;
+    }
+    .recent-list{
+      width:min(700px,100%);display:flex;flex-direction:column;gap:4px;
+      margin-bottom:40px;
+    }
+    .rec-item{
+      display:flex;align-items:center;gap:12px;padding:10px 14px;
+      background:var(--bg2);border:1px solid transparent;border-radius:var(--r);
+      cursor:pointer;text-decoration:none;color:var(--text);transition:.15s;
+    }
+    .rec-item:hover{background:var(--bg3);border-color:var(--border);}
+    .rec-favicon{width:18px;height:18px;border-radius:3px;font-size:14px;}
+    .rec-title{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .rec-url{font-size:11px;color:var(--muted);max-width:260px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+    .footer{margin-top:auto;padding-top:40px;font-size:11px;color:var(--muted);text-align:center;}
+    .footer a{color:var(--accent);text-decoration:none;}
+  </style>
+</head>
+<body>
+  <div class="logo">X</div>
+  <h1>EtherX Browser</h1>
+  <p class="sub" id="dtDisplay"></p>
+
+  <div class="search-box">
+    <span>🔍</span>
+    <input id="searchInput" type="text" placeholder="Pretražuj ili upiši URL..." autofocus>
+    <button id="searchBtn">Traži</button>
+  </div>
+
+  <div class="section-title">Brzi pregled</div>
+  <div class="quick-links" id="quickLinks">
+    <a class="ql-item" href="https://google.com"><div class="ql-icon">🔍</div><div class="ql-name">Google</div></a>
+    <a class="ql-item" href="https://github.com"><div class="ql-icon">🐙</div><div class="ql-name">GitHub</div></a>
+    <a class="ql-item" href="https://youtube.com"><div class="ql-icon">▶</div><div class="ql-name">YouTube</div></a>
+    <a class="ql-item" href="https://twitter.com"><div class="ql-icon">𝕏</div><div class="ql-name">Twitter/X</div></a>
+    <a class="ql-item" href="https://reddit.com"><div class="ql-icon">📰</div><div class="ql-name">Reddit</div></a>
+    <a class="ql-item" href="https://kriptoentuzijasti.io"><div class="ql-icon">₿</div><div class="ql-name">Kripto</div></a>
+  </div>
+
+  <div class="section-title">Nedavno posjećeno</div>
+  <div class="recent-list" id="recentList">
+    <div style="color:#555;font-size:13px;padding:12px 14px;">Učitavanje...</div>
+  </div>
+
+  <div class="footer">
+    © 2024–2026 <a href="https://kriptoentuzijasti.io">kriptoentuzijasti.io</a> —
+    EtherX Browser · Privatno · Sigurno · Web3
+  </div>
+
+  <script>
+  (async function() {
+    // Date/time
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('dtDisplay').textContent =
+        now.toLocaleString('hr-HR',{weekday:'long',day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'});
+    }
+    updateClock(); setInterval(updateClock, 30000);
+
+    // Search
+    const inp = document.getElementById('searchInput');
+    function doSearch() {
+      const q = inp.value.trim(); if (!q) return;
+      window.location.href = q.startsWith('http') ? q : 'https://www.google.com/search?q='+encodeURIComponent(q);
+    }
+    document.getElementById('searchBtn').onclick = doSearch;
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') doSearch(); });
+
+    // Recent history
+    if (typeof etherx !== 'undefined') {
+      const history = await etherx.history.getAll();
+      const recent = (history || []).slice(0, 8);
+      const list = document.getElementById('recentList');
+      if (recent.length === 0) {
+        list.innerHTML = '<div style="color:#555;font-size:13px;padding:12px 14px;">Nema nedavne povijesti.</div>';
+      } else {
+        list.innerHTML = '';
+        recent.forEach(item => {
+          const a = document.createElement('a');
+          a.className = 'rec-item';
+          a.href = item.url;
+          a.innerHTML = `<span class="rec-favicon">🌐</span>
+            <span class="rec-title">${item.title || item.url}</span>
+            <span class="rec-url">${item.url}</span>`;
+          list.appendChild(a);
+        });
+      }
+    }
+  })();
+  </script>
+</body>
+</html>
