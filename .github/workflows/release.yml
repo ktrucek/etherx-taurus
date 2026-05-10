@@ -13,6 +13,9 @@ on:
           - minor
           - major
 
+permissions:
+  contents: write
+
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
@@ -23,7 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       new-version: ${{ steps.bump-version.outputs.new-version }}
-      release-tag: ${{ steps.create-release.outputs.tag }}
+      release-tag: ${{ steps.create-tag.outputs.tag }}
+      release-upload-url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -81,7 +85,7 @@ jobs:
           git push origin main
 
       - name: Create release tag
-        id: create-release
+        id: create-tag
         run: |
           TAG="v${{ steps.bump-version.outputs.new-version }}"
           git tag "$TAG"
@@ -89,6 +93,7 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
+        id: create-release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
