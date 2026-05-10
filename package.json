@@ -1,6 +1,6 @@
 {
   "name": "etherx-browser",
-  "version": "2.4.132",
+  "version": "2.4.133",
   "description": "EtherX Browser — Web3 Desktop Browser (Tauri v2)",
   "private": true,
   "scripts": {
